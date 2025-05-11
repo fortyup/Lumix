@@ -3,15 +3,26 @@
 uniform sampler2D gtexture;
 uniform sampler2D lightmap;
 
+uniform mat4 gbufferModelViewInverse;
+
+uniform vec3 shadowLightPosition;
+
+in vec2 texCoord;
+in vec2 lightMapCoords;
+in vec3 foliageColor;
+in vec3 geoNormal;
+
 /* DRAWBUFFERS:0 */
 layout(location = 0) out vec4 outColor0;
 
-in vec2 texCoord;
-in vec3 foliageColor;
-in vec2 lightMapCoords;
-
 void main()
 {
+    vec3 shadowLightDirection = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
+
+    vec3 worldGeoNormal = mat3(gbufferModelViewInverse) * geoNormal;
+
+    float lightBrightness = clamp(dot(shadowLightDirection, worldGeoNormal), 0.2, 1.0);
+
     vec3 lightColor = pow(texture(lightmap, lightMapCoords).rgb, vec3(2.2));
 
     vec4 outputColorData = pow(texture(gtexture, texCoord), vec4(2.2));
@@ -21,5 +32,6 @@ void main()
     {
         discard;
     }
-    outColor0 = pow(vec4(outputColor, transparency), vec4(1 / 2.2));
+    outputColor *= lightBrightness;
+    outColor0 = vec4(pow(outputColor, vec3(1/2.2)), transparency);
 }

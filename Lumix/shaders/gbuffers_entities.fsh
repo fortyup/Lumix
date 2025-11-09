@@ -1,8 +1,6 @@
 #version 120
 
 #include "/settings.glsl"
-#include "/lib/color_adjustments.glsl"
-
 
 #define COLORED_SHADOWS 1 //0: Stained glass will cast ordinary shadows. 1: Stained glass will cast colored shadows. 2: Stained glass will not cast any shadows. [0 1 2]
 #define SHADOW_BRIGHTNESS 0.75 //Light levels are multiplied by this number when the surface is in shadows [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
@@ -22,10 +20,6 @@ varying vec4 shadowPos;
 const bool shadowcolor0Nearest = true;
 const bool shadowtex0Nearest = true;
 const bool shadowtex1Nearest = true;
-
-//only using this include for shadowMapResolution,
-//since that has to be declared in the fragment stage in order to do anything.
-#include "/distort.glsl"
 
 void main() {
 	vec4 color = texture2D(texture, texcoord) * glcolor;
@@ -65,7 +59,9 @@ void main() {
 	}
 	color *= texture2D(lightmap, lm);
 
-	color.rgb = make_gray(color.rgb, TERRAIN_GRAY_AMOUNT);
+	#if RED_ENTITIES == 1
+		color.rgb = vec3(1.0, 0.0, 0.0);
+	#endif
 
 /* DRAWBUFFERS:0 */
 	gl_FragData[0] = color; //gcolor
